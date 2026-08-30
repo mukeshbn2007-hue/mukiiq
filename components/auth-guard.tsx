@@ -48,7 +48,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           </p>
           <Button onClick={() => signIn()} className="mt-6 w-full" size="lg">
             <AudioWaveform className="size-4" />
-            Sign in to Vorynex
+            Sign in to MUKIIQ
           </Button>
         </motion.div>
       </div>

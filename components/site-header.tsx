@@ -32,7 +32,7 @@ export function SiteHeader() {
             <AudioWaveform className="size-5" />
           </span>
           <span className="text-lg font-semibold tracking-[0.02em]">
-            Voryn<span className="text-primary">ex</span>
+            MUKIIQ
           </span>
         </Link>
 

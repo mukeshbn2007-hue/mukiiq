@@ -208,7 +208,7 @@ export default function LandingPage() {
               <AudioWaveform className="size-4" />
             </span>
             <span className="text-sm font-medium tracking-[0.02em]">
-              Voryn<span className="text-primary">ex</span>
+              MUKIIQ
             </span>
           </div>
           <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
@@ -226,7 +226,7 @@ export default function LandingPage() {
             </a>
           </nav>
           <p className="text-xs text-muted-foreground">
-            © 2026 Vorynex. All rights reserved.
+            © 2026 MUKIIQ. All rights reserved.
           </p>
         </div>
       </footer>

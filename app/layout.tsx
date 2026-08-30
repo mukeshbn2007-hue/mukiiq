@@ -10,7 +10,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'Vorynex — Split Any Song Into Stems',
+  title: 'MUKIIQ — Split Any Song Into Stems',
   description:
     'Separate vocals, drums, bass, and instruments from one track in a clean, simple workspace.',
   generator: 'v0.app',

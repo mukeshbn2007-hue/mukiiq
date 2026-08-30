@@ -35,12 +35,12 @@ type AuthState = {
   signOut: () => void
 }
 
-const STORAGE_KEY = "stemsplit.mock-user"
+const STORAGE_KEY = "mukiiq.mock-user"
 
 const DEMO_USER: MockUser = {
   id: "user_mock_123",
   fullName: "Alex Rivera",
-  email: "alex@stemsplit.io",
+  email: "alex@mukiiq.io",
   initials: "AR",
 }
 
