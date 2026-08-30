@@ -31,8 +31,8 @@ export function SiteHeader() {
           <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <AudioWaveform className="size-5" />
           </span>
-          <span className="text-lg font-semibold tracking-tight">
-            Stem<span className="text-primary">Split</span>
+          <span className="text-lg font-semibold tracking-[0.02em]">
+            Voryn<span className="text-primary">ex</span>
           </span>
         </Link>
 

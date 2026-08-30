@@ -10,9 +10,9 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'StemSplit — AI Music Stem Splitter',
+  title: 'Vorynex — Split Any Song Into Stems',
   description:
-    'Upload a track and get vocals, drums, bass, and instruments separated in seconds with studio-quality AI.',
+    'Separate vocals, drums, bass, and instruments from one track in a clean, simple workspace.',
   generator: 'v0.app',
 }
 

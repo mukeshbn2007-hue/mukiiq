@@ -66,7 +66,7 @@ export default function LandingPage() {
                 className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground"
               >
                 <span className="size-1.5 rounded-full bg-primary" />
-                AI-powered source separation
+                Studio-ready stem separation
               </motion.span>
 
               <motion.h1
@@ -76,7 +76,7 @@ export default function LandingPage() {
                 className="mt-6 text-balance text-4xl font-bold tracking-tight sm:text-6xl"
               >
                 Split Any Song Into{" "}
-                <span className="text-primary">Stems with AI</span>
+                <span className="text-primary">Stems</span>
               </motion.h1>
 
               <motion.p
@@ -85,8 +85,8 @@ export default function LandingPage() {
                 transition={{ duration: 0.5, delay: 0.12 }}
                 className="mx-auto mt-5 max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground"
               >
-                Upload a track. Get vocals, drums, bass, and instruments
-                separated in seconds.
+                Separate vocals, drums, bass, and instruments from one track
+                in a clean, simple workspace.
               </motion.p>
 
               <motion.div
@@ -109,7 +109,7 @@ export default function LandingPage() {
                   render={<Link href="#features" />}
                   className="h-12 border-border bg-transparent px-6 text-base hover:bg-card"
                 >
-                  See how it works
+                  Explore the Workspace
                 </Button>
               </motion.div>
             </div>
@@ -207,8 +207,8 @@ export default function LandingPage() {
             <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <AudioWaveform className="size-4" />
             </span>
-            <span className="text-sm font-medium">
-              Stem<span className="text-primary">Split</span>
+            <span className="text-sm font-medium tracking-[0.02em]">
+              Voryn<span className="text-primary">ex</span>
             </span>
           </div>
           <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
@@ -226,7 +226,7 @@ export default function LandingPage() {
             </a>
           </nav>
           <p className="text-xs text-muted-foreground">
-            © 2026 StemSplit. All rights reserved.
+            © 2026 Vorynex. All rights reserved.
           </p>
         </div>
       </footer>
