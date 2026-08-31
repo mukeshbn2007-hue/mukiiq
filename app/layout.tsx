@@ -1,13 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
 import { MockAuthProvider } from '@/lib/mock-auth'
 import './globals.css'
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-})
 
 export const metadata: Metadata = {
   title: 'MUKIIQ — Split Any Song Into Stems',
@@ -27,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} bg-background`}>
+    <html lang="en" className="bg-background">
       <body className="font-sans antialiased">
         <MockAuthProvider>{children}</MockAuthProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
