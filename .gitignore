@@ -14,3 +14,8 @@ node_modules
 .next/
 .DS_Store
 .env
+
+# Python
+ml-service/.venv/
+ml-service/__pycache__/
+*.pyc
