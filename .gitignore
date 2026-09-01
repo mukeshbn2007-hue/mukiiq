@@ -8,14 +8,34 @@ __v0_jsx-dev-runtime.ts
 
 # Environment variables
 .env*.local
+.env
 
-# Common ignores
-node_modules
+# Node / Next.js
+node_modules/
 .next/
 .DS_Store
-.env
 
 # Python
 ml-service/.venv/
 ml-service/__pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# MUKIIQ generated audio
+ml-service/input/*
+ml-service/output/*
+
+# Keep folder structure
+!ml-service/input/.gitkeep
+!ml-service/output/.gitkeep
+
+# Python cache
+__pycache__/
+.pytest_cache/
+
+# Model/cache files
+*.pth
+*.pt
+*.ckpt
+*.safetensors

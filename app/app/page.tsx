@@ -8,9 +8,20 @@ import { Button } from "@/components/ui/button"
 import { UploadZone } from "@/components/upload-zone"
 import { ProcessingView } from "@/components/processing-view"
 import { StemPlayer } from "@/components/stem-player"
-import { DAILY_LIMIT, buildStems, type Generation } from "@/lib/stems"
+import { DAILY_LIMIT, type Generation, type StemType } from "@/lib/stems"
 
 type Phase = "idle" | "processing" | "done"
+
+const ML_SERVICE_URL = "http://127.0.0.1:8000"
+
+const STEM_TYPES: StemType[] = [
+  "vocals",
+  "drums",
+  "bass",
+  "guitar",
+  "piano",
+  "other",
+]
 
 export default function DashboardPage() {
   const [phase, setPhase] = useState<Phase>("idle")
@@ -23,42 +34,88 @@ export default function DashboardPage() {
 
   const handleFile = async (file: File) => {
     setLimitError(null)
+
     if (remaining <= 0) {
-      setLimitError("You've reached today's free-tier limit. Try again tomorrow.")
+      setLimitError(
+        "You've reached today's free-tier limit. Try again tomorrow.",
+      )
       return
     }
 
     setFilename(file.name)
     setPhase("processing")
 
-    // Mock: POST /api/upload -> queued, then poll /api/status.
-    let generationId = `gen_${Date.now()}`
     try {
-      const form = new FormData()
-      form.append("filename", file.name)
-      form.append("size", String(file.size))
-      const res = await fetch("/api/upload", { method: "POST", body: form })
-      if (res.ok) {
-        const data = await res.json()
-        generationId = data.generationId ?? generationId
+      const formData = new FormData()
+      formData.append("file", file)
+
+      const response = await fetch(`${ML_SERVICE_URL}/separate`, {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        let message = "AI separation failed."
+
+        try {
+          const errorData = await response.json()
+
+          if (errorData?.detail) {
+            message = String(errorData.detail)
+          }
+        } catch {
+          // Keep the default error message.
+        }
+
+        throw new Error(message)
       }
-    } catch {
-      // Fall back to local mock if the route is unavailable.
+
+      const data = await response.json()
+
+      if (
+        data.status !== "completed" ||
+        !data.stems ||
+        typeof data.stems !== "object"
+      ) {
+        throw new Error("The AI service returned an invalid response.")
+      }
+
+      const stems = STEM_TYPES
+        .filter((type) => data.stems[type])
+        .map((type) => ({
+          type,
+          file_url: `${ML_SERVICE_URL}${data.stems[type]}`,
+        }))
+
+      if (stems.length !== STEM_TYPES.length) {
+        throw new Error(
+          "The AI service did not return all six stems.",
+        )
+      }
+
+      const newGeneration: Generation = {
+        id: data.job_id,
+        filename: data.filename ?? file.name,
+        createdAt: new Date().toISOString(),
+        durationLabel: "AI processed",
+        status: "completed",
+        stems,
+      }
+
+      setGeneration(newGeneration)
+      setUsed((count) => count + 1)
+      setPhase("done")
+    } catch (error) {
+      console.error("MUKIIQ separation error:", error)
+
+      setPhase("idle")
+
+      setLimitError(
+        error instanceof Error
+          ? error.message
+          : "Unable to connect to the MUKIIQ AI service.",
+      )
     }
-
-    // Simulate the ~5s separation window.
-    await new Promise((r) => setTimeout(r, 5000))
-
-    setUsed((n) => n + 1)
-    setGeneration({
-      id: generationId,
-      filename: file.name,
-      createdAt: new Date().toISOString(),
-      durationLabel: "3:30",
-      status: "completed",
-      stems: buildStems(),
-    })
-    setPhase("done")
   }
 
   const reset = () => {
@@ -75,10 +132,12 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
             Studio
           </h1>
+
           <p className="mt-1 text-sm text-muted-foreground">
-            Upload a track to separate it into four stems.
+            Upload a track to separate it into six AI-powered stems.
           </p>
         </div>
+
         {phase === "done" && (
           <Button
             variant="outline"
@@ -91,12 +150,14 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* Daily limit banner */}
       <div className="mt-6 flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3">
         <Info className="size-4 shrink-0 text-primary" />
+
         <p className="text-sm text-muted-foreground">
           Free tier: {DAILY_LIMIT} generations/day. You have{" "}
-          <span className="font-semibold text-foreground">{remaining}</span>{" "}
+          <span className="font-semibold text-foreground">
+            {remaining}
+          </span>{" "}
           left today.
         </p>
       </div>
@@ -104,7 +165,10 @@ export default function DashboardPage() {
       {limitError && (
         <div className="mt-4 flex items-center gap-3 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3">
           <AlertCircle className="size-4 shrink-0 text-destructive" />
-          <p className="text-sm text-destructive">{limitError}</p>
+
+          <p className="text-sm text-destructive">
+            {limitError}
+          </p>
         </div>
       )}
 
@@ -118,7 +182,10 @@ export default function DashboardPage() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
             >
-              <UploadZone onFile={handleFile} disabled={remaining <= 0} />
+              <UploadZone
+                onFile={handleFile}
+                disabled={remaining <= 0}
+              />
             </motion.div>
           )}
 
@@ -143,6 +210,7 @@ export default function DashboardPage() {
               transition={{ duration: 0.3 }}
             >
               <StemPlayer generation={generation} />
+
               <p className="mt-4 text-center text-sm text-muted-foreground">
                 Your separations are saved to{" "}
                 <Link

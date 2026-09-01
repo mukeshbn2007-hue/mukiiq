@@ -22,46 +22,61 @@ type TrackState = {
   solo: boolean
 }
 
-const initialTrack: TrackState = { volume: 0.8, muted: false, solo: false }
+const initialTrack: TrackState = {
+  volume: 0.8,
+  muted: false,
+  solo: false,
+}
 
 export function StemPlayer({ generation }: { generation: Generation }) {
   const [playing, setPlaying] = useState(false)
-  const [tracks, setTracks] = useState<Record<StemType, TrackState>>({
-    vocals: { ...initialTrack },
-    drums: { ...initialTrack },
-    bass: { ...initialTrack },
-    other: { ...initialTrack },
-  })
+
+  const [tracks, setTracks] = useState<Record<StemType, TrackState>>(() =>
+    Object.fromEntries(
+      STEM_ORDER.map((type) => [type, { ...initialTrack }]),
+    ) as Record<StemType, TrackState>,
+  )
 
   const audioRefs = useRef<Record<string, HTMLAudioElement | null>>({})
 
   const stemByType = useMemo(() => {
     const map = {} as Record<StemType, string>
-    for (const stem of generation.stems) map[stem.type] = stem.file_url
+
+    for (const stem of generation.stems) {
+      map[stem.type] = stem.file_url
+    }
+
     return map
   }, [generation])
 
-  const anySolo = STEM_ORDER.some((t) => tracks[t].solo)
+  const anySolo = STEM_ORDER.some((type) => tracks[type]?.solo)
 
-  // Compute effective audibility and apply it to the audio elements.
   useEffect(() => {
     for (const type of STEM_ORDER) {
       const el = audioRefs.current[type]
       if (!el) continue
-      const t = tracks[type]
-      const audible = anySolo ? t.solo : !t.muted
-      el.volume = audible ? t.volume : 0
+
+      const track = tracks[type]
+
+      if (!track) {
+        el.volume = 0
+        continue
+      }
+
+      const audible = anySolo ? track.solo : !track.muted
+      el.volume = audible ? track.volume : 0
     }
   }, [tracks, anySolo])
 
   const togglePlay = () => {
     const next = !playing
     setPlaying(next)
+
     for (const type of STEM_ORDER) {
       const el = audioRefs.current[type]
       if (!el) continue
+
       if (next) {
-        el.currentTime = el.currentTime // keep position
         void el.play().catch(() => {})
       } else {
         el.pause()
@@ -69,25 +84,41 @@ export function StemPlayer({ generation }: { generation: Generation }) {
     }
   }
 
-  const updateTrack = (type: StemType, patch: Partial<TrackState>) => {
-    setTracks((prev) => ({ ...prev, [type]: { ...prev[type], ...patch } }))
+  const updateTrack = (
+    type: StemType,
+    patch: Partial<TrackState>,
+  ) => {
+    setTracks((previous) => ({
+      ...previous,
+      [type]: {
+        ...previous[type],
+        ...patch,
+      },
+    }))
   }
 
   const downloadStem = (type: StemType) => {
     const url = stemByType[type]
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `${generation.filename.replace(/\.[^.]+$/, "")}-${type}.mp3`
-    a.rel = "noopener"
-    a.target = "_blank"
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
+
+    if (!url) return
+
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `${generation.filename.replace(/\.[^.]+$/, "")}-${type}.wav`
+    link.rel = "noopener"
+    link.target = "_blank"
+
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
   }
 
   const downloadAll = () => {
-    // Mock: hit the download endpoint which returns a signed URL.
-    window.open(`/api/download/${generation.id}`, "_blank", "noopener")
+    for (const type of STEM_ORDER) {
+      if (stemByType[type]) {
+        downloadStem(type)
+      }
+    }
   }
 
   return (
@@ -106,10 +137,12 @@ export function StemPlayer({ generation }: { generation: Generation }) {
               <Play className="size-5 translate-x-0.5" />
             )}
           </Button>
+
           <div>
             <p className="font-medium">{generation.filename}</p>
+
             <p className="text-xs text-muted-foreground">
-              {generation.durationLabel} • 4 stems
+              {generation.durationLabel} • {generation.stems.length} stems
             </p>
           </div>
         </div>
@@ -120,15 +153,20 @@ export function StemPlayer({ generation }: { generation: Generation }) {
           className="border-border bg-transparent hover:bg-secondary"
         >
           <Download className="size-4" />
-          Download All (ZIP)
+          Download All
         </Button>
       </div>
 
       <div className="mt-6 flex flex-col gap-3">
         {STEM_ORDER.map((type) => {
           const meta = STEM_META[type]
-          const t = tracks[type]
-          const dimmed = anySolo && !t.solo
+          const track = tracks[type]
+          const url = stemByType[type]
+
+          if (!track || !url) return null
+
+          const dimmed = anySolo && !track.solo
+
           return (
             <motion.div
               key={type}
@@ -138,41 +176,54 @@ export function StemPlayer({ generation }: { generation: Generation }) {
                 dimmed && "opacity-40",
               )}
             >
-              {/* Label + waveform */}
               <div className="flex flex-1 items-center gap-3">
                 <span
                   className="size-2.5 shrink-0 rounded-full"
                   style={{ background: meta.color }}
                 />
+
                 <div className="w-16 shrink-0">
                   <p className="text-sm font-medium leading-none">
                     {meta.label}
                   </p>
                 </div>
+
                 <div className="h-8 min-w-0 flex-1">
                   <Waveform
                     bars={56}
                     color={meta.color}
-                    animate={playing && !dimmed && !(t.muted && !anySolo)}
+                    animate={
+                      playing &&
+                      !dimmed &&
+                      !(track.muted && !anySolo)
+                    }
                     seed={type.charCodeAt(0)}
                   />
                 </div>
               </div>
 
-              {/* Controls */}
               <div className="flex items-center gap-1.5">
                 <Button
                   size="icon"
                   variant="ghost"
-                  onClick={() => updateTrack(type, { muted: !t.muted })}
+                  onClick={() =>
+                    updateTrack(type, {
+                      muted: !track.muted,
+                    })
+                  }
                   className={cn(
                     "size-8 text-muted-foreground hover:text-foreground",
-                    t.muted && "text-destructive hover:text-destructive",
+                    track.muted &&
+                      "text-destructive hover:text-destructive",
                   )}
-                  aria-label={t.muted ? `Unmute ${meta.label}` : `Mute ${meta.label}`}
-                  aria-pressed={t.muted}
+                  aria-label={
+                    track.muted
+                      ? `Unmute ${meta.label}`
+                      : `Mute ${meta.label}`
+                  }
+                  aria-pressed={track.muted}
                 >
-                  {t.muted ? (
+                  {track.muted ? (
                     <VolumeX className="size-4" />
                   ) : (
                     <Volume2 className="size-4" />
@@ -182,23 +233,34 @@ export function StemPlayer({ generation }: { generation: Generation }) {
                 <Button
                   size="icon"
                   variant="ghost"
-                  onClick={() => updateTrack(type, { solo: !t.solo })}
+                  onClick={() =>
+                    updateTrack(type, {
+                      solo: !track.solo,
+                    })
+                  }
                   className={cn(
                     "size-8 text-muted-foreground hover:text-foreground",
-                    t.solo && "bg-primary/15 text-primary hover:text-primary",
+                    track.solo &&
+                      "bg-primary/15 text-primary hover:text-primary",
                   )}
-                  aria-label={t.solo ? `Unsolo ${meta.label}` : `Solo ${meta.label}`}
-                  aria-pressed={t.solo}
+                  aria-label={
+                    track.solo
+                      ? `Unsolo ${meta.label}`
+                      : `Solo ${meta.label}`
+                  }
+                  aria-pressed={track.solo}
                 >
                   <Headphones className="size-4" />
                 </Button>
 
                 <Slider
-                  value={[Math.round(t.volume * 100)]}
+                  value={[Math.round(track.volume * 100)]}
                   max={100}
                   step={1}
-                  onValueChange={([v]) =>
-                    updateTrack(type, { volume: v / 100 })
+                  onValueChange={([value]) =>
+                    updateTrack(type, {
+                      volume: value / 100,
+                    })
                   }
                   className="w-24"
                   aria-label={`${meta.label} volume`}
@@ -216,13 +278,12 @@ export function StemPlayer({ generation }: { generation: Generation }) {
               </div>
 
               <audio
-                ref={(el) => {
-                  audioRefs.current[type] = el
+                ref={(element) => {
+                  audioRefs.current[type] = element
                 }}
-                src={stemByType[type]}
+                src={url}
                 preload="none"
                 loop
-                crossOrigin="anonymous"
               />
             </motion.div>
           )

@@ -1,11 +1,21 @@
-export type StemType = "vocals" | "drums" | "bass" | "other"
+export type StemType =
+  | "vocals"
+  | "drums"
+  | "bass"
+  | "guitar"
+  | "piano"
+  | "other"
 
 export type Stem = {
   type: StemType
   file_url: string
 }
 
-export type GenerationStatus = "queued" | "processing" | "completed" | "failed"
+export type GenerationStatus =
+  | "queued"
+  | "processing"
+  | "completed"
+  | "failed"
 
 export type Generation = {
   id: string
@@ -20,15 +30,48 @@ export const STEM_META: Record<
   StemType,
   { label: string; color: string; description: string }
 > = {
-  vocals: { label: "Vocals", color: "#00dc82", description: "Lead & backing voice" },
-  drums: { label: "Drums", color: "#ff5c7c", description: "Kick, snare & percussion" },
-  bass: { label: "Bass", color: "#5c8cff", description: "Bassline & low end" },
-  other: { label: "Other", color: "#f5b74a", description: "Synths & instruments" },
+  vocals: {
+    label: "Vocals",
+    color: "#00dc82",
+    description: "Lead & backing voice",
+  },
+  drums: {
+    label: "Drums",
+    color: "#ff5c7c",
+    description: "Kick, snare & percussion",
+  },
+  bass: {
+    label: "Bass",
+    color: "#5c8cff",
+    description: "Bassline & low end",
+  },
+  guitar: {
+    label: "Guitar",
+    color: "#a78bfa",
+    description: "Guitar & strings",
+  },
+  piano: {
+    label: "Piano",
+    color: "#f472b6",
+    description: "Piano & keys",
+  },
+  other: {
+    label: "Other",
+    color: "#f5b74a",
+    description: "Other instruments",
+  },
 }
 
-export const STEM_ORDER: StemType[] = ["vocals", "drums", "bass", "other"]
+export const STEM_ORDER: StemType[] = [
+  "vocals",
+  "drums",
+  "bass",
+  "guitar",
+  "piano",
+  "other",
+]
 
-// Public-domain / freely usable sample audio used as placeholder stems.
+// Public-domain / freely usable sample audio used by the existing history UI.
 const SAMPLE_AUDIO = [
   "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
   "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
