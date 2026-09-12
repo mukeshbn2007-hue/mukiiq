@@ -1,33 +1,95 @@
-# mukiiq
+# 🎵 MUKIIQ
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
+### AI-Powered Audio Stem Separation Platform
 
-## Built with v0
+MUKIIQ is an AI-powered audio platform designed to separate music into individual components such as vocals and instrumentals.
 
-This repository is linked to a [v0](https://v0.app) project. You can continue developing by visiting the link below -- start new chats to make changes, and v0 will push commits directly to this repo. Every merge to `main` will automatically deploy.
+Built with the goal of making advanced audio processing more accessible through a simple and modern interface.
 
-[Continue working on v0 →](https://v0.app/chat/projects/prj_k35OyQNz9ntboH8e8iMToOC1p21e)
+---
 
-## Getting Started
+## 🚀 What is MUKIIQ?
 
-First, run the development server:
+MUKIIQ allows users to upload an audio track and process it using AI-powered stem separation technology.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+The platform focuses on separating different components of a song, including:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- 🎤 Vocals
+- 🎹 Instrumentals
+- 🥁 Individual audio components
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-## Learn More
+## ✨ Features
 
-To learn more, take a look at the following resources:
+- 🎵 Upload audio files
+- 🤖 AI-powered stem separation
+- 🎤 Vocal isolation
+- 🎹 Instrumental extraction
+- 📁 Download separated audio
+- ⚡ Modern and responsive interface
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [v0 Documentation](https://v0.app/docs) - learn about v0 and how to use it.
+---
+
+## 🛠️ Tech Stack
+
+- **Next.js**
+- **React**
+- **TypeScript**
+- **Python**
+- **AI / Machine Learning**
+- **Audio Processing**
+
+---
+
+## 🎯 Why I Built This
+
+I wanted to build a real-world AI product instead of just learning concepts.
+
+MUKIIQ combines my interests in:
+
+- Artificial Intelligence
+- Python
+- Machine Learning
+- Audio Technology
+- Product Development
+
+The goal is to continuously improve the platform and turn MUKIIQ into a useful AI-powered audio product.
+
+---
+
+## 🔮 Future Plans
+
+- Advanced stem separation
+- Faster AI processing
+- Multiple audio formats
+- Better download management
+- User accounts
+- Audio preview
+- Improved AI models
+
+---
+
+## 🌐 Live Project
+
+🔗 **Website:** https://mukiiq.vercel.app
+
+---
+
+## 👨‍💻 Developer
+
+**Mukesh B N**
+
+Computer Science Student | AI Developer | Product Builder
+
+I'm passionate about building AI-powered products that solve real-world problems.
+
+🌐 Portfolio: https://mukesh-portfolio-ten-dusky.vercel.app
+
+💼 LinkedIn: https://www.linkedin.com/in/mukesh-booma-nagendrakumar-a55121341
+
+💻 GitHub: https://github.com/mukeshbn2007-hue
+
+---
+
+### ⭐ If you like MUKIIQ, consider giving the repository a star!
