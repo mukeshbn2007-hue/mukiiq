@@ -1,6 +1,7 @@
 from pathlib import Path
-import subprocess
-import sys
+
+from demucs.api import Separator as DemucsSeparator
+from demucs.api import save_audio
 
 
 MODEL = "htdemucs_6s"
@@ -9,9 +10,30 @@ MODEL = "htdemucs_6s"
 class StemSeparator:
     def __init__(self, output_dir: str = "output"):
         self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.output_dir.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
 
-    def separate(self, audio_path: str, job_id: str) -> dict:
+        print(
+            f"[MUKIIQ] Initializing Demucs model: {MODEL}"
+        )
+
+        self.separator = DemucsSeparator(
+            model=MODEL,
+            device="cpu",
+            progress=True,
+        )
+
+        print(
+            "[MUKIIQ] Demucs model ready."
+        )
+
+    def separate(
+        self,
+        audio_path: str,
+        job_id: str,
+    ) -> dict:
         audio = Path(audio_path)
 
         if not audio.exists():
@@ -19,82 +41,91 @@ class StemSeparator:
                 f"Audio file not found: {audio}"
             )
 
-        job_output_dir = self.output_dir / job_id
-        job_output_dir.mkdir(parents=True, exist_ok=True)
-
-        command = [
-            sys.executable,
-            "-m",
-            "demucs",
-            "-n",
-            MODEL,
-            "-d",
-            "cpu",
-            "-o",
-            str(job_output_dir),
-            str(audio),
-        ]
-
-        result = subprocess.run(
-            command,
-            capture_output=True,
-            text=True,
+        job_output_dir = (
+            self.output_dir
+            / job_id
+            / MODEL
         )
 
-        if result.returncode != 0:
-            raise RuntimeError(
-                f"Demucs failed:\n{result.stderr}"
+        job_output_dir.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        print(
+            f"[MUKIIQ] Separating: {audio.name}"
+        )
+
+        _, separated = (
+            self.separator.separate_audio_file(
+                audio
+            )
+        )
+
+        stems = {}
+
+        for name, source in separated.items():
+            stem_file = (
+                job_output_dir
+                / f"{name}.wav"
             )
 
-        # Demucs creates:
-        #
-        # output/job_id/
-        #   htdemucs_6s/
-        #     <audio-name>/
-        #
-        # Find the actual track directory safely.
-        model_dir = job_output_dir / MODEL
-
-        if not model_dir.exists():
-            raise RuntimeError(
-                "Demucs completed but the model output directory "
-                "was not created."
+            save_audio(
+                source,
+                str(stem_file),
+                samplerate=self.separator.samplerate,
+                bitrate=320,
+                clip="rescale",
+                as_float=False,
+                bits_per_sample=16,
             )
 
-        track_directories = [
-            directory
-            for directory in model_dir.iterdir()
-            if directory.is_dir()
-        ]
+            stems[name] = stem_file
 
-        if not track_directories:
-            raise RuntimeError(
-                "Demucs completed but no track output was found."
+            print(
+                f"[MUKIIQ] Created: {stem_file.name}"
             )
 
-        stem_dir = track_directories[0]
-
-        stems = {
-            "vocals": stem_dir / "vocals.wav",
-            "drums": stem_dir / "drums.wav",
-            "bass": stem_dir / "bass.wav",
-            "guitar": stem_dir / "guitar.wav",
-            "piano": stem_dir / "piano.wav",
-            "other": stem_dir / "other.wav",
+        expected_stems = {
+            "vocals",
+            "drums",
+            "bass",
+            "guitar",
+            "piano",
+            "other",
         }
 
         missing = [
+            name
+            for name in expected_stems
+            if name not in stems
+        ]
+
+        if missing:
+            raise RuntimeError(
+                "Expected stems were not created: "
+                f"{missing}"
+            )
+
+        missing_files = [
             name
             for name, path in stems.items()
             if not path.exists()
         ]
 
-        if missing:
+        if missing_files:
             raise RuntimeError(
-                f"Expected stems were not created: {missing}"
+                "Stem files are missing after separation: "
+                f"{missing_files}"
             )
 
+        print(
+            "[MUKIIQ] Separation completed."
+        )
+
         return {
-            name: str(path.resolve())
+            name: str(
+                path.resolve()
+            )
             for name, path in stems.items()
         }
