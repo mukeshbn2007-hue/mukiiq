@@ -39,3 +39,12 @@ __pycache__/
 *.pt
 *.ckpt
 *.safetensors
+
+# PyInstaller generated files
+ml-service/dist/
+ml-service/build/
+ml-service/*.spec.bak
+
+# Tauri generated files
+src-tauri/target/
+src-tauri/binaries/_internal/
